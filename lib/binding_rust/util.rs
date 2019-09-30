@@ -40,6 +40,8 @@ impl<T: Copy> ExactSizeIterator for CBufferIter<T> {}
 
 impl<T> Drop for CBufferIter<T> {
     fn drop(&mut self) {
-        unsafe { free_ptr(self.ptr as *mut c_void); }
+        unsafe {
+            free_ptr(self.ptr as *mut c_void);
+        }
     }
 }

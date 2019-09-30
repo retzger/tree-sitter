@@ -53,7 +53,7 @@ typedef struct {
 
 typedef struct {
   void *payload;
-  const char *(*read)(void *payload, uint32_t byte_index, TSPoint position, uint32_t *bytes_read);
+  const char *(*read)(void *payload, uint32_t byte_index, const TSPoint *position, uint32_t *bytes_read);
   TSInputEncoding encoding;
 } TSInput;
 
@@ -221,7 +221,7 @@ const TSRange *ts_parser_included_ranges(
 TSTree *ts_parser_parse(
   TSParser *self,
   const TSTree *old_tree,
-  TSInput input
+  const TSInput *input
 );
 
 /**
@@ -294,7 +294,7 @@ const size_t *ts_parser_cancellation_flag(const TSParser *self);
  * previously assigned, the caller is responsible for releasing any memory
  * owned by the previous logger.
  */
-void ts_parser_set_logger(TSParser *self, TSLogger logger);
+void ts_parser_set_logger(TSParser *self, const TSLogger *logger);
 
 /**
  * Get the parser's current logger.

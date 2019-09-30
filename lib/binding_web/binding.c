@@ -130,15 +130,15 @@ void ts_parser_new_wasm() {
 static const char *call_parse_callback(
   void *payload,
   uint32_t byte,
-  TSPoint position,
+  const TSPoint *position,
   uint32_t *bytes_read
 ) {
   char *buffer = (char *)payload;
   tree_sitter_parse_callback(
     buffer,
     byte_to_code_unit(byte),
-    position.row,
-    byte_to_code_unit(position.column),
+    position->row,
+    byte_to_code_unit(position->column),
     bytes_read
   );
   *bytes_read = code_unit_to_byte(*bytes_read);
@@ -150,7 +150,7 @@ static const char *call_parse_callback(
 
 void ts_parser_enable_logger_wasm(TSParser *self, bool should_log) {
   TSLogger logger = {self, should_log ? tree_sitter_log_callback : NULL};
-  ts_parser_set_logger(self, logger);
+  ts_parser_set_logger(self, &logger);
 }
 
 TSTree *ts_parser_parse_wasm(
@@ -174,7 +174,7 @@ TSTree *ts_parser_parse_wasm(
   } else {
     ts_parser_set_included_ranges(self, NULL, 0);
   }
-  return ts_parser_parse(self, old_tree, input);
+  return ts_parser_parse(self, old_tree, &input);
 }
 
 /******************/

@@ -57,7 +57,7 @@ pub struct TSInput {
         unsafe extern "C" fn(
             payload: *mut ::std::os::raw::c_void,
             byte_index: u32,
-            position: TSPoint,
+            position: *const TSPoint,
             bytes_read: *mut u32,
         ) -> *const ::std::os::raw::c_char,
     >,
@@ -216,7 +216,7 @@ extern "C" {
     pub fn ts_parser_parse(
         self_: *mut TSParser,
         old_tree: *const TSTree,
-        input: TSInput,
+        input: *const TSInput,
     ) -> *mut TSTree;
 }
 extern "C" {
@@ -281,7 +281,7 @@ extern "C" {
     #[doc = " The parser does not take ownership over the logger payload. If a logger was"]
     #[doc = " previously assigned, the caller is responsible for releasing any memory"]
     #[doc = " owned by the previous logger."]
-    pub fn ts_parser_set_logger(self_: *mut TSParser, logger: TSLogger);
+    pub fn ts_parser_set_logger(self_: *mut TSParser, logger: *const TSLogger);
 }
 extern "C" {
     #[doc = " Get the parser\'s current logger."]
