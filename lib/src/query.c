@@ -896,7 +896,7 @@ void ts_query_cursor_delete(TSQueryCursor *self) {
 void ts_query_cursor_exec(
   TSQueryCursor *self,
   const TSQuery *query,
-  TSNode node
+  const TSNode *node
 ) {
   array_clear(&self->states);
   array_clear(&self->finished_states);
@@ -961,8 +961,10 @@ static QueryState *ts_query_cursor_copy_state(
 // there are no more matches, return `false`.
 static inline bool ts_query_cursor__advance(TSQueryCursor *self) {
   do {
+    TSNode node = ts_tree_cursor_current_node(&self->cursor);
+
     if (self->ascending) {
-      LOG("leave node %s\n", ts_node_type(ts_tree_cursor_current_node(&self->cursor)));
+      LOG("leave node %s\n", ts_node_type(&node));
 
       // When leaving a node, remove any unfinished states whose next step
       // needed to match something within that node.
@@ -1005,8 +1007,7 @@ static inline bool ts_query_cursor__advance(TSQueryCursor *self) {
         &can_have_later_siblings,
         &can_have_later_siblings_with_this_field
       );
-      TSNode node = ts_tree_cursor_current_node(&self->cursor);
-      TSSymbol symbol = ts_node_symbol(node);
+      TSSymbol symbol = ts_node_symbol(&node);
       if (symbol != ts_builtin_sym_error) {
         symbol = self->query->symbol_map[symbol];
       }
@@ -1014,8 +1015,8 @@ static inline bool ts_query_cursor__advance(TSQueryCursor *self) {
       // If this node is before the selected range, then avoid descending
       // into it.
       if (
-        ts_node_end_byte(node) <= self->start_byte ||
-        point_lte(ts_node_end_point(node), self->start_point)
+        ts_node_end_byte(&node) <= self->start_byte ||
+        point_lte(ts_node_end_point(&node), self->start_point)
       ) {
         if (!ts_tree_cursor_goto_next_sibling(&self->cursor)) {
           self->ascending = true;
@@ -1025,14 +1026,14 @@ static inline bool ts_query_cursor__advance(TSQueryCursor *self) {
 
       // If this node is after the selected range, then stop walking.
       if (
-        self->end_byte <= ts_node_start_byte(node) ||
-        point_lte(self->end_point, ts_node_start_point(node))
+        self->end_byte <= ts_node_start_byte(&node) ||
+        point_lte(self->end_point, ts_node_start_point(&node))
       ) return false;
 
       LOG(
         "enter node %s. row:%u state_count:%u, finished_state_count: %u\n",
-        ts_node_type(node),
-        ts_node_start_point(node).row,
+        ts_node_type(&node),
+        ts_node_start_point(&node).row,
         self->states.size,
         self->finished_states.size
       );
@@ -1274,7 +1275,7 @@ bool ts_query_cursor_next_capture(
             &self->capture_list_pool,
             state->capture_list_id
           );
-          uint32_t capture_byte = ts_node_start_byte(captures[0].node);
+          uint32_t capture_byte = ts_node_start_byte(&captures[0].node);
           if (
             capture_byte < first_unfinished_capture_byte ||
             (
@@ -1300,7 +1301,7 @@ bool ts_query_cursor_next_capture(
             state->capture_list_id
           );
           uint32_t capture_byte = ts_node_start_byte(
-            captures[state->consumed_capture_count].node
+            &captures[state->consumed_capture_count].node
           );
           if (
             capture_byte < first_finished_capture_byte ||

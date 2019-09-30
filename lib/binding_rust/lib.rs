@@ -603,29 +603,29 @@ impl<'tree> Node<'tree> {
     }
 
     pub fn kind_id(&self) -> u16 {
-        unsafe { ffi::ts_node_symbol(self.0) }
+        unsafe { ffi::ts_node_symbol(self.p()) }
     }
 
     pub fn kind(&self) -> &'static str {
-        unsafe { CStr::from_ptr(ffi::ts_node_type(self.0)) }
+        unsafe { CStr::from_ptr(ffi::ts_node_type(self.p())) }
             .to_str()
             .unwrap()
     }
 
     pub fn is_named(&self) -> bool {
-        unsafe { ffi::ts_node_is_named(self.0) }
+        unsafe { ffi::ts_node_is_named(self.p()) }
     }
 
     pub fn is_extra(&self) -> bool {
-        unsafe { ffi::ts_node_is_extra(self.0) }
+        unsafe { ffi::ts_node_is_extra(self.p()) }
     }
 
     pub fn has_changes(&self) -> bool {
-        unsafe { ffi::ts_node_has_changes(self.0) }
+        unsafe { ffi::ts_node_has_changes(self.p()) }
     }
 
     pub fn has_error(&self) -> bool {
-        unsafe { ffi::ts_node_has_error(self.0) }
+        unsafe { ffi::ts_node_has_error(self.p()) }
     }
 
     pub fn is_error(&self) -> bool {
@@ -633,15 +633,15 @@ impl<'tree> Node<'tree> {
     }
 
     pub fn is_missing(&self) -> bool {
-        unsafe { ffi::ts_node_is_missing(self.0) }
+        unsafe { ffi::ts_node_is_missing(self.p()) }
     }
 
     pub fn start_byte(&self) -> usize {
-        unsafe { ffi::ts_node_start_byte(self.0) as usize }
+        unsafe { ffi::ts_node_start_byte(self.p()) as usize }
     }
 
     pub fn end_byte(&self) -> usize {
-        unsafe { ffi::ts_node_end_byte(self.0) as usize }
+        unsafe { ffi::ts_node_end_byte(self.p()) as usize }
     }
 
     pub fn byte_range(&self) -> std::ops::Range<usize> {
@@ -658,24 +658,24 @@ impl<'tree> Node<'tree> {
     }
 
     pub fn start_position(&self) -> Point {
-        let result = unsafe { ffi::ts_node_start_point(self.0) };
+        let result = unsafe { ffi::ts_node_start_point(self.p()) };
         result.into()
     }
 
     pub fn end_position(&self) -> Point {
-        let result = unsafe { ffi::ts_node_end_point(self.0) };
+        let result = unsafe { ffi::ts_node_end_point(self.p()) };
         result.into()
     }
 
     pub fn child(&self, i: usize) -> Option<Self> {
-        Self::new(unsafe { ffi::ts_node_child(self.0, i as u32) })
+        Self::new(unsafe { ffi::ts_node_child(self.p(), i as u32) })
     }
 
     pub fn child_by_field_name(&self, field_name: impl AsRef<[u8]>) -> Option<Self> {
         let field_name = field_name.as_ref();
         Self::new(unsafe {
             ffi::ts_node_child_by_field_name(
-                self.0,
+                self.p(),
                 field_name.as_ptr() as *const c_char,
                 field_name.len() as u32,
             )
@@ -683,11 +683,11 @@ impl<'tree> Node<'tree> {
     }
 
     pub fn child_by_field_id(&self, field_id: u16) -> Option<Self> {
-        Self::new(unsafe { ffi::ts_node_child_by_field_id(self.0, field_id) })
+        Self::new(unsafe { ffi::ts_node_child_by_field_id(self.p(), field_id) })
     }
 
     pub fn child_count(&self) -> usize {
-        unsafe { ffi::ts_node_child_count(self.0) as usize }
+        unsafe { ffi::ts_node_child_count(self.p()) as usize }
     }
 
     pub fn children(&self) -> impl ExactSizeIterator<Item = Node<'tree>> {
@@ -698,59 +698,59 @@ impl<'tree> Node<'tree> {
     }
 
     pub fn named_child<'a>(&'a self, i: usize) -> Option<Self> {
-        Self::new(unsafe { ffi::ts_node_named_child(self.0, i as u32) })
+        Self::new(unsafe { ffi::ts_node_named_child(self.p(), i as u32) })
     }
 
     pub fn named_child_count(&self) -> usize {
-        unsafe { ffi::ts_node_named_child_count(self.0) as usize }
+        unsafe { ffi::ts_node_named_child_count(self.p()) as usize }
     }
 
     pub fn parent(&self) -> Option<Self> {
-        Self::new(unsafe { ffi::ts_node_parent(self.0) })
+        Self::new(unsafe { ffi::ts_node_parent(self.p()) })
     }
 
     pub fn next_sibling(&self) -> Option<Self> {
-        Self::new(unsafe { ffi::ts_node_next_sibling(self.0) })
+        Self::new(unsafe { ffi::ts_node_next_sibling(self.p()) })
     }
 
     pub fn prev_sibling(&self) -> Option<Self> {
-        Self::new(unsafe { ffi::ts_node_prev_sibling(self.0) })
+        Self::new(unsafe { ffi::ts_node_prev_sibling(self.p()) })
     }
 
     pub fn next_named_sibling(&self) -> Option<Self> {
-        Self::new(unsafe { ffi::ts_node_next_named_sibling(self.0) })
+        Self::new(unsafe { ffi::ts_node_next_named_sibling(self.p()) })
     }
 
     pub fn prev_named_sibling(&self) -> Option<Self> {
-        Self::new(unsafe { ffi::ts_node_prev_named_sibling(self.0) })
+        Self::new(unsafe { ffi::ts_node_prev_named_sibling(self.p()) })
     }
 
     pub fn descendant_for_byte_range(&self, start: usize, end: usize) -> Option<Self> {
         Self::new(unsafe {
-            ffi::ts_node_descendant_for_byte_range(self.0, start as u32, end as u32)
+            ffi::ts_node_descendant_for_byte_range(self.p(), start as u32, end as u32)
         })
     }
 
     pub fn named_descendant_for_byte_range(&self, start: usize, end: usize) -> Option<Self> {
         Self::new(unsafe {
-            ffi::ts_node_named_descendant_for_byte_range(self.0, start as u32, end as u32)
+            ffi::ts_node_named_descendant_for_byte_range(self.p(), start as u32, end as u32)
         })
     }
 
     pub fn descendant_for_point_range(&self, start: Point, end: Point) -> Option<Self> {
         Self::new(unsafe {
-            ffi::ts_node_descendant_for_point_range(self.0, start.into(), end.into())
+            ffi::ts_node_descendant_for_point_range(self.p(), start.into(), end.into())
         })
     }
 
     pub fn named_descendant_for_point_range(&self, start: Point, end: Point) -> Option<Self> {
         Self::new(unsafe {
-            ffi::ts_node_named_descendant_for_point_range(self.0, start.into(), end.into())
+            ffi::ts_node_named_descendant_for_point_range(self.p(), start.into(), end.into())
         })
     }
 
     pub fn to_sexp(&self) -> String {
-        let c_string = unsafe { ffi::ts_node_string(self.0) };
+        let c_string = unsafe { ffi::ts_node_string(self.p()) };
         let result = unsafe { CStr::from_ptr(c_string) }
             .to_str()
             .unwrap()
@@ -768,12 +768,16 @@ impl<'tree> Node<'tree> {
     }
 
     pub fn walk(&self) -> TreeCursor<'tree> {
-        TreeCursor(unsafe { ffi::ts_tree_cursor_new(self.0) }, PhantomData)
+        TreeCursor(unsafe { ffi::ts_tree_cursor_new(self.p()) }, PhantomData)
     }
 
     pub fn edit(&mut self, edit: &InputEdit) {
         let edit = edit.into();
         unsafe { ffi::ts_node_edit(&mut self.0 as *mut ffi::TSNode, &edit) }
+    }
+
+    fn p(&self) -> *const ffi::TSNode {
+        &self.0 as *const ffi::TSNode
     }
 }
 
@@ -848,7 +852,7 @@ impl<'a> TreeCursor<'a> {
     }
 
     pub fn reset(&mut self, node: Node<'a>) {
-        unsafe { ffi::ts_tree_cursor_reset(&mut self.0, node.0) };
+        unsafe { ffi::ts_tree_cursor_reset(&mut self.0, node.p()) };
     }
 }
 
@@ -1266,7 +1270,7 @@ impl QueryCursor {
         mut text_callback: impl FnMut(Node<'a>) -> &[u8] + 'a,
     ) -> impl Iterator<Item = QueryMatch<'a>> + 'a {
         let ptr = self.0.as_ptr();
-        unsafe { ffi::ts_query_cursor_exec(ptr, query.ptr.as_ptr(), node.0) };
+        unsafe { ffi::ts_query_cursor_exec(ptr, query.ptr.as_ptr(), node.p()) };
         std::iter::from_fn(move || loop {
             unsafe {
                 let mut m = MaybeUninit::<ffi::TSQueryMatch>::uninit();
@@ -1289,7 +1293,7 @@ impl QueryCursor {
         text_callback: impl FnMut(Node<'a>) -> T + 'a,
     ) -> QueryCaptures<'a, T> {
         let ptr = self.0.as_ptr();
-        unsafe { ffi::ts_query_cursor_exec(ptr, query.ptr.as_ptr(), node.0) };
+        unsafe { ffi::ts_query_cursor_exec(ptr, query.ptr.as_ptr(), node.p()) };
         QueryCaptures {
             ptr,
             query,
